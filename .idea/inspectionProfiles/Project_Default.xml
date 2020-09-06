@@ -1,0 +1,15 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="src.oop.test_oop1.oop1" />
+          <option value="doubly_linked_list.DoublyLinkedList" />
+          <option value="binary_search_tree.binary_search_tree.deque" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

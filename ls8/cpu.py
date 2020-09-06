@@ -1,6 +1,6 @@
 """CPU functionality."""
-
 import sys
+
 
 
 class CPU:
@@ -9,12 +9,10 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 256 # 256 bytes
-        self.reg = [0] * 8 # 8 bytes
+        self.reg = [0] * 8 # 8 register
         self.pc = 0
         self.running = True
         
-    
-
     def load(self):
         """Load a program into memory."""
 
@@ -73,25 +71,27 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        LDI = 0b10000010 # LDI R0,8
-        PRN = 0b01000111 # PRN R0
-        HLT = 0b00000001 # HLT
-          
         
-        while running:
-           IR = self.ram(self.pc)
-           
-           instruction_a = self.ram_read(self.pc + 1)
-           instruction_b = self.ram_read(self.pc + 2)
-           
-           self.pc += 1 + (IR >> 6)
-           
-           if IR == HLT:
-               self.running = False
-               
-           elif IR == LDI:
-               self.reg[instruction_a] = instruction_b
-               
-           elif IR == PRN:
-               print(self.reg[instruction_a])
+        HLT = 0b00000001# Halt
+        LDI = 0b10000010 # Set the value of a register to an integer
+        PRN = 0b01000111 # Print
+        
+        while self.running:
+            #Reads memory for reg and stores results in IR
+            IR = self.ram_read(self.pc)
+            #Reads bytes with pc+1
+            operand_a = self.ram_read(self.pc + 1)
+             #Reads bytes with pc+2
+            operand_b = self.ram_read(self.pc + 2)
             
+            self.pc += 1 + (IR >> 6)
+            
+            if IR == LDI:
+               self.reg[operand_a] = operand_b
+               
+            elif IR == PRN:
+               print(self.reg[operand_a])
+
+            elif IR == HLT:
+                   self.running = False
+       
