@@ -6,6 +6,8 @@ HLT = 0b00000001  # Halt
 LDI = 0b10000010  # Set the value of a register to an integer
 PRN = 0b01000111  # Print
 MUL = 0b10100010  # Multiply
+POP = 0b01000110
+PUSH = 0b01000101
 
 
 class CPU:
@@ -17,24 +19,33 @@ class CPU:
         self.reg = [0] * 8 # 8 register
         self.pc = 0
         self.running = True
+        self.reg[7] = 0xf4
         
-    if len(sys.argv) != 2:
-            print("Usage: ls8.py filename")
-            sys.exit(1)
+        self.branchtable = {}
+        self.branchtable[LDI] = self.ldi
+        self.branchtable[PRN] = self.prn
+        self.branchtable[HLT] = self.hlt
+        self.branchtable[POP] = self.pop
+        self.branchtable[PUSH] = self.push
         
         
-    def load(self,filename):
+        
+    # if len(sys.argv) != 2:
+    #         print( 72)
+    #         sys.exit(1)
+        
+        
+    def load(self, filename):
         """Load a program into memory."""
         address = 0
         
-        print(sys.argv)
-        
         try:
-            with open(self.filename) as file:
+            with open(filename) as file:
                 for line in file:
                     split_comment = line.split("#")
                     
-                    number = split_comment[0].strip()
+                    number = split_comment[0]
+                    number.strip()
                     
                     if number == "":
                         continue
@@ -42,11 +53,12 @@ class CPU:
                     if number[0] == "1" or number[0] == "0":
                         num = number[:8]
                         
-                    self.ram[address] = int(num, 2)
-                    address += 1
-                        
+                        self.ram[address] = int(num, 2)
+                        address += 1
+        
+                   
         except FileNotFoundError:
-            print(f"{sys.argv[0]} : {sys.argv[1]} file not found")
+            print(f"{sys.argv[1]} file not found")
             sys.exit(2)
        
 
@@ -60,7 +72,7 @@ class CPU:
         """ALU operations."""
 
         if op == MUL:
-            self.reg[reg_a] += self.reg[reg_b]
+            self.reg[reg_a] *= self.reg[reg_b]
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -87,9 +99,6 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        
-
-        
         while self.running:
             #Reads memory for reg and stores results in IR
             IR = self.ram_read(self.pc)
@@ -104,15 +113,27 @@ class CPU:
             
             if alu_command:
                 self.alu(IR, operand_a, operand_b)
+                
+            else:
+                self.branchtable[IR](operand_a, operand_b)
             
-            if IR == LDI:
-               self.reg[operand_a] = operand_b
+    def ldi(self, operand_a,operand_b):
+            self.reg[operand_a] = operand_b
                
-            elif IR == PRN:
-               print(self.reg[operand_a])
+    def prn(self, operand_a, operand_b):
+            print(self.reg[operand_a])
 
-            elif IR == HLT:
-                   self.running = False
+    def hlt(self, _,__):
+            self.running = False
                    
-           
-       
+    def pop(self, reg_address, __):
+            sp =self.reg[7]
+            value = self.ram[sp]
+            self.reg[reg_address] = value
+            self.reg[7] += 1
+    
+    def push(self, operand_a,__):
+            self.reg[7] -= 1
+            sp = self.reg[7]
+            value = self.reg[operand_a]  
+            self.ram[sp] = value  
